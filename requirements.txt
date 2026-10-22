@@ -1,0 +1,15 @@
+# Verified in a fresh venv (see EXECUTION_REPORT.md): Python 3.13.16 on Linux x86_64.
+# opendp and opacus are pinned: the example relies on make_user_measurement,
+# renyi_divergence and make_fully_adaptive_composition as they behave in opendp 0.16.0,
+# and on DPOptimizer / UniformWithReplacementSampler as in opacus 1.6.0.
+opendp==0.16.0
+opacus==1.6.0
+torch>=2.2,<3
+numpy>=1.26
+
+# tests and notebook cross-checks
+scipy>=1.11
+dp-accounting==0.6.0
+pytest>=8
+jupyter
+nbconvert
