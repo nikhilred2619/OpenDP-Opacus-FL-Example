@@ -35,10 +35,9 @@ jobs:
           python --version | tee python-version.txt
           python -m pip freeze > pip-freeze.txt
           python - <<'PY'
-          import torch, opendp, opacus
-          print("torch:", torch.__version__)
-          print("opendp:", opendp.__version__)
-          print("opacus:", opacus.__version__)
+          import importlib.metadata
+          for name in ("torch", "opendp", "opacus"):
+              print(f"{name}: {importlib.metadata.version(name)}")
           PY
 
       - name: Execute automated tests
