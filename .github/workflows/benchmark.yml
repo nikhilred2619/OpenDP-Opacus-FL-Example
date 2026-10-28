@@ -1,0 +1,73 @@
+name: Exploratory DP utility-gap benchmark
+
+on:
+  push:
+    branches: [benchmark-dp-utility-gap]
+    paths:
+      - "benchmarks/**"
+      - "tests/test_dp_utility_gap.py"
+      - ".github/workflows/benchmark.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install benchmark dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt "scikit-learn>=1.5"
+          python -m pip check
+          python -m pip freeze > benchmark-dependencies.txt
+
+      - name: Test benchmark invariants
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest -q tests/test_dp_utility_gap.py 2>&1 | tee benchmark-tests.log
+
+      - name: Smoke experiment
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m benchmarks.dp_utility_gap --scenarios iid --seeds 11 \
+            --rounds 1 --local-steps 1 --out benchmark-smoke \
+            2>&1 | tee benchmark-smoke.log
+
+      - name: Full exploratory benchmark
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m benchmarks.dp_utility_gap \
+            --scenarios iid,label_dirichlet --seeds 11,23,37 \
+            --rounds 6 --local-steps 3 --out benchmark-output \
+            2>&1 | tee benchmark-full.log
+
+      - name: Upload measured results and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fl-privacy-utility-results
+          path: |
+            benchmark-dependencies.txt
+            benchmark-tests.log
+            benchmark-smoke.log
+            benchmark-full.log
+            benchmark-smoke/**
+            benchmark-output/**
+          if-no-files-found: warn
+          retention-days: 30
