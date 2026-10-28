@@ -34,7 +34,7 @@ def test_label_dirichlet_is_more_skewed_than_iid():
     _, y, *_ = load_public_digits(11)
     iid = client_indices(y, 3, "iid", 1020)
     skew = client_indices(y, 3, "label_dirichlet", 1020)
-    assert np.std([y[g].mean() for g in skew]) > np.std([y[g].mean() for g in iid)
+    assert np.std([y[g].mean() for g in skew]) > np.std([y[g].mean() for g in iid])
 
 
 def test_bad_splits_are_rejected():
