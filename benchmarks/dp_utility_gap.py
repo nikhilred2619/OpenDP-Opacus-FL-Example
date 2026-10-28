@@ -20,6 +20,7 @@ from sklearn.model_selection import train_test_split
 from torch import nn
 
 from src import fl
+from src import accounting as acc
 
 
 @dataclass(frozen=True)
@@ -119,6 +120,7 @@ def plain_client_round(state, data, cfg, dimension, seed):
 
 
 def run_pair(protocol, scenario, seed):
+    acc.enable_opendp_features()  # Required by Stage 1's custom OpenDP domain.
     cfg = protocol.dp_config()
     X, y, ids, X_test, y_test, test_ids = load_public_digits(seed)
     groups = client_indices(
